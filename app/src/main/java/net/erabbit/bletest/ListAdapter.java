@@ -1,4 +1,4 @@
-package erabbit.erabbit.bletest;
+package net.erabbit.bletest;
 
 import android.content.Context;
 import android.view.LayoutInflater;

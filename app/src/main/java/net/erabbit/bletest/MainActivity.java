@@ -1,4 +1,4 @@
-package erabbit.erabbit.bletest;
+package net.erabbit.bletest;
 
 import android.app.Activity;
 import android.content.Context;
@@ -24,6 +24,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.util.ArrayList;
+
 
 public class MainActivity extends Activity {
 
@@ -88,8 +89,7 @@ public class MainActivity extends Activity {
             bleDevice = bleDevicesManager.findDevice(deviceID);
             //startActivity();
             Toast.makeText(context, "连接到设备：" + bleDevice.getDeviceName(), Toast.LENGTH_SHORT).show();
-            bleDevice.sendData("send", "1".getBytes());
-            bleDevice.startReceiveData("bleDevice");
+
 
         }
 
@@ -118,7 +118,8 @@ public class MainActivity extends Activity {
         public void onDeviceReady(String deviceID) {
             super.onDeviceReady(deviceID);
             LogUtil.i(TAG, "onDeviceReady");
-
+            bleDevice.sendData("send", "1".getBytes());
+            bleDevice.startReceiveData("bleDevice");
         }
 
         @Override
