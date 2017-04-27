@@ -2,166 +2,121 @@ package net.erabbit.bletest;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.CheckBox;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import net.erabbit.BleDevice;
-import net.erabbit.BleDevicesManager;
-import net.erabbit.BleSearchReceiver;
-import net.erabbit.DeviceStateReceiver;
-import net.erabbit.utils.LogUtil;
+import net.erabbit.ble.BleDevice;
+import net.erabbit.ble.BleDevicesManager;
+import net.erabbit.ble.BleSearchReceiver;
+import net.erabbit.ble.utils.LogUtil;
 
 import org.json.JSONException;
-import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Map;
 
 
 public class MainActivity extends Activity {
 
     ListView listView;
     ProgressBar progress;
+    CheckBox checkbox;
+
     LocalBroadcastManager lbm;
 
     String TAG = this.getClass().getSimpleName();
     BleDevicesManager bleDevicesManager;
     BleDevice bleDevice;
-    ListAdapter myAdapter;
-    ArrayList<BleDevice> list;
+    MainAdapter myAdapter;
+    ArrayList<Device> list;
     Context context = this;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_new_test);
+        setContentView(R.layout.activity_main);
         listView = (ListView) findViewById(R.id.listView);
         progress = (ProgressBar) findViewById(R.id.progress);
+        checkbox = (CheckBox) findViewById(R.id.checkbox);
         bleDevicesManager = BleDevicesManager.getInstance(this);
         lbm = LocalBroadcastManager.getInstance(this);
         new MySearchReceiver().registerReceiver(lbm);
-        new MyDeviceStateReceiver().registerReceiver(lbm);
 
         //bleDevicesManager.addDeviceFilter(readJSON());
-
-
         list = new ArrayList<>();
-        myAdapter = new ListAdapter(list, this);
+        myAdapter = new MainAdapter(list, this);
         listView.setAdapter(myAdapter);
         myAdapter.notifyDataSetChanged();
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                BleDevice device = list.get(position);
-                if (device != null)
-                    device.connect();
+                Device device = list.get(position);
+                String deviceID = device.addr;
+                if ("CC2650 SensorTag".equals(device.name)) {
+                    Intent intent = new Intent(context, CharacteristicActivity.class);
+                    intent.putExtra("deviceID", deviceID);
+                    startActivity(intent);
+                } else {
+                    Toast.makeText(context, "本测试工程只能连接CC2650 SensorTag", Toast.LENGTH_SHORT).show();
+                }
             }
         });
-
     }
 
     public void onSearch(View view) {
         Log.i(TAG, "===onSearch");
+        if (checkbox.isChecked()) {
+            try {
+                bleDevicesManager.addSearchFilter(JsonUtil.readJSON(context));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
         bleDevicesManager.startSearch(this);
-    }
-
-    public void onDisconnect(View view) {
-        if (bleDevice != null) {
-            bleDevice.disconnect();
-        }
-    }
-
-    class MyDeviceStateReceiver extends DeviceStateReceiver {
-
-        @Override
-        public void onDeviceConnected(String deviceID) {
-            super.onDeviceConnected(deviceID);
-            LogUtil.i(TAG, "onDeviceConnected");
-            bleDevice = bleDevicesManager.findDevice(deviceID);
-            //startActivity();
-            Toast.makeText(context, "连接到设备：" + bleDevice.getDeviceName(), Toast.LENGTH_SHORT).show();
-
-
-        }
-
-        @Override
-        public void onDeviceDisconnected(String deviceID) {
-            super.onDeviceDisconnected(deviceID);
-            LogUtil.i(TAG, "onDeviceDisconnected");
-            Toast.makeText(context, "已断开连接", Toast.LENGTH_SHORT).show();
-        }
-
-        @Override
-        public void onDeviceError(String deviceID, int errId, String error) {
-            super.onDeviceError(deviceID, errId, error);
-            LogUtil.i(TAG, "onDeviceError");
-
-        }
-
-        @Override
-        public void onDeviceMismatch(String deviceID) {
-            super.onDeviceMismatch(deviceID);
-            LogUtil.i(TAG, "onDeviceMismatch");
-
-        }
-
-        @Override
-        public void onDeviceReady(String deviceID) {
-            super.onDeviceReady(deviceID);
-            LogUtil.i(TAG, "onDeviceReady");
-            bleDevice.sendData("send", "1".getBytes());
-            bleDevice.startReceiveData("bleDevice");
-        }
-
-        @Override
-        public void onDeviceReceivedData(String deviceID, String name, byte[] data) {
-            super.onDeviceReceivedData(deviceID, name, data);
-            LogUtil.i(TAG, "onDeviceReceivedData");
-
-        }
-
-        @Override
-        public void onDeviceRSSIUpdated(String deviceID, int rssi) {
-            super.onDeviceRSSIUpdated(deviceID, rssi);
-            LogUtil.i(TAG, "onDeviceRSSIUpdated");
-
-        }
-
-        @Override
-        public void onDeviceValueChanged(String deviceID, int key, Serializable value) {
-            super.onDeviceValueChanged(deviceID, key, value);
-            LogUtil.i(TAG, "onDeviceValueChanged");
-
-        }
     }
 
 
     class MySearchReceiver extends BleSearchReceiver {
         @Override
-        public void onFoundDevice(String deviceID, int rssi, byte[] data, String deviceType) {
+        public void onFoundDevice(String deviceID, int rssi, Map<Integer, byte[]> data, String deviceType) {
             super.onFoundDevice(deviceID, rssi, data, deviceType);
             LogUtil.i(TAG, "onFoundDevice");
-            BleDevice bleDevice = bleDevicesManager.findDevice(deviceID);
-            if (bleDevice == null) {
-                bleDevice = bleDevicesManager.createDevice(deviceID, MainActivity.this, BleDevice.class, readJSON());
-            }
-            list.add(bleDevice);
+            Device device = new Device();
+            device.addr = deviceID;
+            device.name = deviceType;
+            device.rssi = rssi;
+            list.add(device);
+
+            Collections.sort(list, new Comparator<Device>() {
+                @Override
+                public int compare(Device o1, Device o2) {
+                    if (o1.rssi > o2.rssi) {
+                        return -1;
+                    } else if (o1.rssi < o2.rssi) {
+                        return 1;
+                    }
+                    return 0;
+                }
+            });
+
+            myAdapter.notifyDataSetChanged();
         }
 
         @Override
         public void onAdvertisementUpdated() {
             super.onAdvertisementUpdated();
             LogUtil.i(TAG, "onAdvertisementUpdated");
-
         }
 
         @Override
@@ -183,32 +138,9 @@ public class MainActivity extends Activity {
             super.onSearchTimeOut();
             LogUtil.i(TAG, "onSearchTimeOut");
             progress.setVisibility(View.GONE);
-            myAdapter.notifyDataSetChanged();
-
         }
 
     }
-
-
-    private JSONObject readJSON() {
-        JSONObject testjson = null;
-        try {
-            InputStreamReader isr = new InputStreamReader(getAssets().open("testjson.json"), "UTF-8");
-            BufferedReader br = new BufferedReader(isr);
-            String line;
-            StringBuilder builder = new StringBuilder();
-            while ((line = br.readLine()) != null) {
-                builder.append(line);
-            }
-            br.close();
-            isr.close();
-            testjson = new JSONObject(builder.toString());//builder读取了JSON中的数据。
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return testjson;
-    }
-
 
     @Override
     protected void onDestroy() {

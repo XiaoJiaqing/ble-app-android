@@ -2,8 +2,8 @@
 
   "version": "2017-04-17",
   "advertisement": {
-    "name": "C2650 SensorTag",
-    "service": "6e400001b5a3f393e0a9e50e24dcca9e",
+    "name": "CC2650 SensorTag",
+    "service": "aa80",
     "nameFilterPattern": ".+"
   },
   "services": [
@@ -12,17 +12,17 @@
       "name": "Light",
       "characteristics": [
         {
-          "uuid": "f000aa7204514000b000000000000000",
+          "uuid": "f000aa72-0451-4000-b000-000000000000",
           "name": "send",
           "properties": [
             "write"
           ]
         },
         {
-          "uuid": "f000aa7104514000b000000000000000",
+          "uuid": "f000aa71-0451-4000-b000-000000000000",
           "name": "bleDevice",
           "properties": [
-            "notify"
+            "notify","read"
           ]
         }
       ]

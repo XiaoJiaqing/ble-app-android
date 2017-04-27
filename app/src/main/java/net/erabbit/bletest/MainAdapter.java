@@ -7,21 +7,19 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
-import net.erabbit.BleDevice;
-
 import java.util.List;
 
 /**
  * Created by ziv on 2017/4/24.
  */
 
-public class ListAdapter extends BaseAdapter {
+public class MainAdapter extends BaseAdapter {
 
     Context context;
     LayoutInflater inflater;
-    List<BleDevice> list;
+    List<Device> list;
 
-    public ListAdapter(List<BleDevice> list, Context context) {
+    public MainAdapter(List<Device> list, Context context) {
         this.list = list;
         this.inflater = LayoutInflater.from(context);
     }
@@ -50,19 +48,21 @@ public class ListAdapter extends BaseAdapter {
             holder = new ViewHolder();
             holder.name = (TextView) convertView.findViewById(R.id.name);
             holder.addr = (TextView) convertView.findViewById(R.id.addr);
+            holder.rssi = (TextView) convertView.findViewById(R.id.rssi);
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
         }
-        BleDevice device = list.get(position);
-        holder.name.setText("设备名： " + device.getDeviceName());
-        holder.addr.setText("地址： " + device.getDeviceKey());
-
+        Device device = list.get(position);
+        holder.name.setText("设备名： " + device.name);
+        holder.addr.setText("地址： " + device.addr);
+        holder.rssi.setText("rssi： " + device.rssi);
         return convertView;
     }
 
     class ViewHolder {
         public TextView name;
         public TextView addr;
+        public TextView rssi;
     }
 }
