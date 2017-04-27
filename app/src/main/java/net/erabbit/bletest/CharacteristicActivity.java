@@ -1,6 +1,7 @@
 package net.erabbit.bletest;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
@@ -23,6 +24,7 @@ import net.erabbit.ble.utils.LogUtil;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 
 public class CharacteristicActivity extends AppCompatActivity {
 
@@ -66,7 +68,7 @@ public class CharacteristicActivity extends AppCompatActivity {
 
         if (bleDevice != null) {
             bleDevice.connect();
-            deviceName.setText("当前设备："+bleDevice.getDeviceName() + "(" + bleDevice.getDeviceKey() + ")");
+            deviceName.setText("当前设备：" + bleDevice.getDeviceName() + "(" + bleDevice.getDeviceKey() + ")");
         }
     }
 
@@ -181,6 +183,7 @@ public class CharacteristicActivity extends AppCompatActivity {
             LogUtil.i(TAG, "onDeviceValueChanged");
 
         }
+
     }
 
 }

@@ -114,8 +114,8 @@ public class MainActivity extends Activity {
         }
 
         @Override
-        public void onAdvertisementUpdated() {
-            super.onAdvertisementUpdated();
+        public void onAdvertisementUpdated(String deviceID, Map<Integer, byte[]> data) {
+            super.onAdvertisementUpdated(deviceID,data);
             LogUtil.i(TAG, "onAdvertisementUpdated");
         }
 
