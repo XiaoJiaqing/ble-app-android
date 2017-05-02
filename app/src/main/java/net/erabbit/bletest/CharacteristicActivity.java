@@ -58,7 +58,6 @@ public class CharacteristicActivity extends AppCompatActivity {
         LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this);
         new MyDeviceStateReceiver().registerReceiver(lbm);
 
-
         String deviceID = getIntent().getStringExtra("deviceID");
 
         bleDevice = bleDevicesManager.findDevice(deviceID);

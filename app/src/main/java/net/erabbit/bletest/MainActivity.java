@@ -83,6 +83,7 @@ public class MainActivity extends Activity {
                 e.printStackTrace();
             }
         }
+        //bleDevicesManager.setSearchTimeout(10*1000);
         bleDevicesManager.startSearch(this);
     }
 
@@ -145,7 +146,5 @@ public class MainActivity extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        // lbm.unregisterReceiver();
-        // lbm.unregisterReceiver();
     }
 }
