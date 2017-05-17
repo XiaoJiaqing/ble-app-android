@@ -1,3 +1,4 @@
 [submodule "ble"]
 	path = ble
 	url = https://github.com/rabbitom/ble-android.git
+    branch = release
